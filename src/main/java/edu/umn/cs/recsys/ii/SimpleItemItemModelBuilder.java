@@ -11,13 +11,12 @@ import org.grouplens.lenskit.data.dao.UserEventDAO;
 import org.grouplens.lenskit.data.event.Event;
 import org.grouplens.lenskit.data.history.RatingVectorUserHistorySummarizer;
 import org.grouplens.lenskit.data.history.UserHistory;
-import org.grouplens.lenskit.scored.ScoredId;
-import org.grouplens.lenskit.scored.ScoredIdListBuilder;
-import org.grouplens.lenskit.scored.ScoredIds;
+import org.grouplens.lenskit.scored.*;
 import org.grouplens.lenskit.vectors.ImmutableSparseVector;
 import org.grouplens.lenskit.vectors.MutableSparseVector;
 import org.grouplens.lenskit.vectors.SparseVector;
 import org.grouplens.lenskit.vectors.VectorEntry;
+import org.grouplens.lenskit.vectors.similarity.CosineVectorSimilarity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,9 +53,37 @@ public class SimpleItemItemModelBuilder implements Provider<SimpleItemItemModel>
         // Map items to vectors of item similarities
         Map<Long,MutableSparseVector> itemSimilarities = new HashMap<Long, MutableSparseVector>();
 
+        Map<Long,List<ScoredId>> returnMap = new HashMap<Long, List<ScoredId>>();
         // TODO Compute the similarities between each pair of items
+        for(Map.Entry<Long, ImmutableSparseVector> entry:itemVectors.entrySet()){
+            MutableSparseVector simVector = MutableSparseVector.create(items,0);
+            ScoredIdListBuilder scoreListBuilder = new ScoredIdListBuilder();
+            long itemId = entry.getKey();  // base itemId
+            ImmutableSparseVector itemVector = entry.getValue(); // base item vector
+            for(Map.Entry<Long, ImmutableSparseVector> compareEntry:itemVectors.entrySet()){
+                long compareItemId = compareEntry.getKey();
+                ImmutableSparseVector compareItemVector = compareEntry.getValue();
+                ScoredIdBuilder builder = new ScoredIdBuilder(compareItemId,0);
+                // Calculate the similarity between itemVector and compareItemVector
+                double sim = new CosineVectorSimilarity().similarity(itemVector, compareItemVector);
+                // Store it into itemSimilarities
+                if(sim > 0){
+                    simVector.set(compareItemId,sim);
+                    builder.setScore(sim);
+                }
+                scoreListBuilder.add(builder.build());
+            }
+            //
+            itemSimilarities.put(itemId, simVector);
+            PackedScoredIdList scoredIdList = scoreListBuilder.finish();
+            returnMap.put(itemId, scoredIdList);
+        }
+
+
         // It will need to be in a map of longs to lists of Scored IDs to store in the model
-        return new SimpleItemItemModel(Collections.EMPTY_MAP);
+
+        //return new SimpleItemItemModel(Collections.EMPTY_MAP);
+        return new SimpleItemItemModel(returnMap);
     }
 
     /**
