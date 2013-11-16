@@ -22,10 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author <a href="http://www.grouplens.org">GroupLens Research</a>
@@ -75,7 +72,11 @@ public class SimpleItemItemModelBuilder implements Provider<SimpleItemItemModel>
             }
             //
             itemSimilarities.put(itemId, simVector);
-            PackedScoredIdList scoredIdList = scoreListBuilder.finish();
+            // Need to sort the list inside soreListBuilder....
+            MyScoredIdComparator comp = new MyScoredIdComparator();
+
+            // scoreListBuilder.sort(comp).finish()
+            PackedScoredIdList scoredIdList = scoreListBuilder.sort(comp).finish();// scoreListBuilder.finish();
             returnMap.put(itemId, scoredIdList);
         }
 
@@ -131,5 +132,12 @@ public class SimpleItemItemModelBuilder implements Provider<SimpleItemItemModel>
             itemVectors.put(entry.getKey(), vec.immutable());
         }
         return itemVectors;
+    }
+}
+
+class MyScoredIdComparator implements Comparator<ScoredId> {
+    @Override
+    public int compare(ScoredId o1, ScoredId o2) {
+        return Double.compare(o2.getScore(),o1.getScore() ); // for non-increasing order
     }
 }
