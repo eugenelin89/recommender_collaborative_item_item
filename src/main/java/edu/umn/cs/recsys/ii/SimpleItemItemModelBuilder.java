@@ -74,13 +74,24 @@ public class SimpleItemItemModelBuilder implements Provider<SimpleItemItemModel>
         }
         // itemData should now contain a map to accumulate the ratings of each item
 
-        // stream over all user events
+        // stream over all user events.
         Cursor<UserHistory<Event>> stream = userEventDao.streamEventsByUser();
         try {
             for (UserHistory<Event> evt: stream) {
+                // Each event consist of the user and all his ratings. A rating is an item-value pair.
+                // Here, we summarize all the events of a given user into a vector.
                 MutableSparseVector vector = RatingVectorUserHistorySummarizer.makeRatingVector(evt).mutableCopy();
+                long userId = evt.getUserId(); // userId
                 // vector is now the user's rating vector
                 // TODO Normalize this vector and store the ratings in the item data
+                double meanRating = vector.mean();
+                for(VectorEntry e:vector.fast()){
+                    long itemId = e.getKey(); // itemId
+                    double rating = e.getValue(); // rating
+                    rating = rating-meanRating;
+                    //vector.set(itemId,rating);
+                    itemData.get(itemId).put(userId,rating);
+                }
             }
         } finally {
             stream.close();
