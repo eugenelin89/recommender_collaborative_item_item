@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <title>Recommendation System with Item-Item Collaborative Filtering by eugenelin89</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>Recommendation System with Item-Item Collaborative Filtering</h1>
+        <h2>A recommender system prototype based on item-item collaborative filtering</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/eugenelin89/recommender_collaborative_item_item/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/eugenelin89/recommender_collaborative_item_item/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/eugenelin89/recommender_collaborative_item_item" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h2>
+<a name="setup" class="anchor" href="#setup"><span class="octicon octicon-link"></span></a>Setup</h2>
+
+<p>The system is built with LensKit, an open-source took kit for building recommenders.</p>
+
+<p>Requires the following:</p>
+
+<p><a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html/">Java SE Development Kit 7</a></p>
+
+<p><a href="http://lenskit.grouplens.org/">LensKit</a></p>
+
+<p><a href="https://maven.apache.org/">Apache Maven</a></p>
+
+<p>Java IDE such as <a href="http://www.eclipse.org/">Eclipse</a> or <a href="http://www.jetbrains.com/idea/">IntelliJ IDEA</a>.</p>
+
+<h2>
+<a name="background" class="anchor" href="#background"><span class="octicon octicon-link"></span></a>Background</h2>
+
+<p>This recommendation system prototype uses item-item collaborative filtering.  <a href="http://files.grouplens.org/papers/www10_sarwar.pdf">Here for details.</a></p>
+
+<p>The algorithm is composed of the following steps.</p>
+
+<ol>
+<li><p>Building a model by computing similarities between items.  We do this by:
+a. Subtract the user's mean rating from each rating prior to computing similarities.
+b. Calculate <a href="http://en.wikipedia.org/wiki/Cosine_similarity">cosine similarity</a> between items.</p></li>
+<li><p>Score the items.  By using a pre-defined number of neighbours computed in step 1, the item is scored using <a href="http://files.grouplens.org/papers/www10_sarwar.pdf">weighted sum</a>.</p></li>
+<li><p>The item-item similarity matrix is also useful for 'find similar items' features.  Items can be scored with the sum of its similarity to each of their reference items.</p></li>
+</ol><h2>
+<a name="test-drive" class="anchor" href="#test-drive"><span class="octicon octicon-link"></span></a>Test Drive</h2>
+
+<p>A set of test data is provided for movie ratings, but can be easily adopted for other domains.</p>
+
+<p>data/movie-titles.csv
+Maps Movie IDs to Movie Titles.</p>
+
+<p>data/ratings.csv
+Users and their movie ratings. Each line of the CSV file is ordered as: User ID, Movie ID, Rating</p>
+
+<p>data/users.csv
+Maps User ID to User Name.</p>
+
+<p>Run the recommender with command similar to the following:
+run-ii 1024:77 1024:268 1024:462 1024:393 1024:36955 2048:77 2048:36955 2048:788</p>
+
+<p>For each pair, the first item is the User ID and the second pair is the Movie ID.</p>
+
+<p>Outputs associate score for each move/user pair.  With the test dataset, the following result is obtained.
+2048,788,4.1253,Mrs. Doubtfire (1993)
+2048,36955,3.8545,True Lies (1994)
+2048,77,4.5102,Memento (2000)
+1024,462,2.9900,Erin Brockovich (2000)
+1024,393,3.7702,Kill Bill: Vol. 2 (2004)
+1024,36955,2.5612,True Lies (1994)
+1024,77,4.1968,Memento (2000)
+1024,268,2.3366,Batman (1989)</p>
+
+<p>For running the 'find similar items' feature with reference item:
+run-ii --basket 77</p>
+
+<p>Output:
+550,0.3192,Fight Club (1999)
+629,0.3078,The Usual Suspects (1995)
+38,0.2574,Eternal Sunshine of the Spotless Mind (2004)
+278,0.2399,The Shawshank Redemption (1994)
+680,0.2394,Pulp Fiction (1994)</p>
+
+<p>Can also run with multiple reference items:
+run-ii --basket 77 680</p>
+
+<p>Output:
+550,0.6941,Fight Club (1999)
+629,0.5984,The Usual Suspects (1995)
+238,0.5361,The Godfather (1972)
+278,0.5166,The Shawshank Redemption (1994)
+274,0.4916,The Silence of the Lambs (1991)</p>
+      </section>
+    </div>
+
+    
+  </body>
+</html>
